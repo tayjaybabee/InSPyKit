@@ -38,7 +38,8 @@ def Login():
 
     In an effort to keep your exploited connection from becoming free-for-all for the entire internet it's wise to
     password-protect your access to the victim shell. That's where this function comes in, because moving on with the
-    rest of the script the `Login` function will play on a loop
+    rest of the script won't be possible without the predefined password. Incorrect attempts just lead to the function
+    looping/calling itself infinitely.
 
     Returns:
         None
