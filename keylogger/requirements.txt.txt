@@ -1,7 +1,0 @@
-pywin32
-pynput
-scipy
-cpytopgraphy
-requests
-pillow
-sounddevice

