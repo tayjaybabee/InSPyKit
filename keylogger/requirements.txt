@@ -5,3 +5,4 @@ cpytopgraphy
 requests
 pillow
 sounddevice
+psutil

@@ -9,6 +9,8 @@ from email.mime.base import MIMEBase
 from email import encoders
 import smtplib
 
+from psutil import virtual_memory
+
 # Standard system libraries to gather info
 
 import socket
@@ -176,6 +178,7 @@ def comp_info():
         f.write(header)
         f.write(ip_addr_str)
         f.write(f'Processor: {platform.processor()}\n')
+        f.write(f'Physical Memory: {}')
         f.write(f'System: {platform.system()} {platform.version()}\n')
         f.write(f'Machine: {platform.machine()}\n')
         f.write(f'Hostname: {hostname}\n')
