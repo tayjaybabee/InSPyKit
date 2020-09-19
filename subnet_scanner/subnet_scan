@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+        printf "\n** Trapped CTRL-C **\n"
+        kill "$$"
+}
+
+echo My PID is "$$"
+
+if [ -z "$1" ]
+then
+    echo You entered no prefix.
+    PREFIX=192.168.1.
+else
+    echo Setting prefix to "$1"
+    PREFIX="$1"
+fi
+
+is_alive_ping()
+{
+    echo Checking "$1"
+    ping -c 1 "$1" > /dev/null
+    [ $? -eq 0 ] && echo Node with IP: "$i" is up
+}
+
+for i in "$PREFIX"{1..255}
+do
+is_alive_ping $i
+done
+
+echo Completed in $SECONDS
